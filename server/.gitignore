@@ -1,0 +1,5 @@
+node_modules
+
+# these should be ignored, only kept for demo purposes
+# .env
+# cdn/

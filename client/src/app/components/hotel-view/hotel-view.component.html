@@ -1,0 +1,334 @@
+<app-dynamic-lottie *ngIf="state.loading"></app-dynamic-lottie>
+
+<div *ngIf="!state.loading && state.error">Error loading hotel</div>
+<div class="container p-5" style="min-height: 86.21vh">
+  <ng-container *ngIf="!state.loading && !state.error">
+    <div class="card mb-3">
+      <div class="row g-0">
+        <div class="col-md-8">
+          <div [id]="'carousel-'+hotel._id" class="carousel slide">
+            <div class="carousel-inner">
+              <div *ngFor="let photo of hotel.photos; let i = index" class="carousel-item" [ngClass]="{'active': i == 0}">
+                <img
+                  width="100%"
+                  height="100%"
+                  src="http://localhost:5000/cdn/static/photos/hotel/{{hotel._id}}/{{photo}}"
+                  class="d-block rounded-start"
+                  alt="hotel photo">
+              </div>
+            </div>
+            <button class="carousel-control-prev" type="button" [attr.data-bs-target]="'#carousel-'+hotel._id" data-bs-slide="prev">
+              <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+              <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" [attr.data-bs-target]="'#carousel-'+hotel._id" data-bs-slide="next">
+              <span class="carousel-control-next-icon" aria-hidden="true"></span>
+              <span class="visually-hidden">Next</span>
+            </button>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card-body d-flex flex-column">
+            <h5 class="m-1 fs-3 card-title">{{hotel.name}}</h5>
+            <p class="m-1 fs-4 card-text">
+              {{hotel.location}}
+            </p>
+            <p class="m-1 card-text">
+              <small class="text-muted">
+                <span *ngFor="let i of [].constructor(getWholeStars(hotel.rating))">&starf;</span>
+                <span *ngFor="let i of [].constructor(getEmptyStars(hotel.rating))">&star;</span>
+                {{hotel.rating}} ({{hotel.ratedBy.length}})
+              </small>
+            </p>
+            <p class="m-2 card-text" style='overflow: hidden; text-overflow: ellipsis;'>{{hotel.description}}</p>
+            <div class="actions">
+              <ng-container *ngIf="profile.role === 'hotelOwner'">
+                <button type="button" class="m-1 btn btn-primary" data-bs-toggle="modal" data-bs-target="#addRoomModal">
+                  Add a room
+                </button>
+                <button type="button" class="m-1 btn btn-secondary" data-bs-toggle="modal" data-bs-target="#editHotelModal">
+                  Edit
+                </button>
+                <button type="button" class="m-1 btn btn-danger" (click)="deleteHotelPhotos()">
+                  Delete All Photos
+                </button>
+                <button type="button" class="m-1 btn btn-danger" (click)="deleteHotel()">
+                  Delete Hotel
+                </button>
+              </ng-container>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <hr>
+
+    <div>
+      <h3>Rooms of {{hotel.name}}</h3>
+      <div *ngIf="!rooms.length">No rooms available.</div>
+
+
+      <ng-container *ngFor="let room of rooms">
+        <div class="card mb-3"><!--*ngIf="isAvailable(room)"> -->
+          <div class="row g-0">
+            <div class="col-md-8">
+              <div [id]="'carousel-'+room._id" class="carousel slide">
+                <div class="carousel-inner">
+                  <div *ngFor="let photo of room.photos; let i = index" class="carousel-item" [ngClass]="{'active': i == 0}">
+                    <img
+                      width="100%"
+                      height="350"
+                      [src]="'http://localhost:5000/cdn/static/photos/room/' + room._id + '/' + photo"
+                      class="d-block rounded-start"
+                      alt="room photo">
+                  </div>
+                </div>
+                <button class="carousel-control-prev" type="button" [attr.data-bs-target]="'#carousel-'+room._id" data-bs-slide="prev">
+                  <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                  <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button" [attr.data-bs-target]="'#carousel-'+room._id" data-bs-slide="next">
+                  <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                  <span class="visually-hidden">Next</span>
+                </button>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="card-body d-flex flex-column">
+                <h5 class="m-2 fs-3 card-title">{{room.roomName}}</h5>
+                <p class="m-2 card-text">Room Type: {{room.type}}</p>
+                <p class="m-2 card-text">Capacity: {{room.capacity}}</p>
+                <p class="m-2 card-text">Price: {{room.price}}</p>
+                <p class="m-2 card-text">Available From: {{room.availableFrom | date: 'medium'}}</p>
+                <p class="m-2 card-text" *ngIf="room.availableTo">Available To: {{room.availableTo | date: 'medium'}}
+                <p class="m-2 card-text" *ngIf="room.amenities.length > 0">
+                  <span
+                    *ngFor="let amenity of splitAmenities(room.amenities)"
+                    class="badge bg-dark" style="margin-right: 7px;">
+                    {{amenity}}
+                  </span>
+                </p>
+                <div class="actions">
+                  <ng-container *ngIf="profile.role === 'customer'">
+                    <button (click)="bookRoom(room)" class="m-2 btn btn-primary">Book this room</button>
+                  </ng-container>
+                  <ng-container *ngIf="profile.role === 'hotelOwner'">
+                    <button type="button" class="m-1 btn btn-secondary" data-bs-toggle="modal" data-bs-target="#editRoomModal" (click)="selectedRoom = room">
+                      Edit Room
+                    </button>
+                    <button type="button" class="m-1 btn btn-danger" (click)="deleteRoomPhotos(room)">Delete All Photos</button>
+                    <button type="button" class="m-1 btn btn-danger" (click)="deleteRoom(room)">Delete Room</button>
+                  </ng-container>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+    </div>
+  </ng-container>
+</div>
+
+
+<div class="modal fade" id="editHotelModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Edit Hotel</h5>
+        <button type="button" class="btn-close" id="editHotelCloseModal" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="editHotelForm" (ngSubmit)="editHotel()">
+          <div class="form-group">
+            <label for="name" class="form-label">Name</label>
+            <input type="text" formControlName="name" id="name" [ngClass]="getFormClass(editHotelForm, 'name')" class="form-control"/>
+            <div class="invalid-feedback" *ngIf="!isValid(editHotelForm, 'name')">
+              Please provide a valid name.
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="location" class="form-label">Location</label>
+            <input type="text" formControlName="location" id="location" [ngClass]="getFormClass(editHotelForm, 'location')" class="form-control"/>
+            <div class="invalid-feedback" *ngIf="!isValid(editHotelForm, 'location')">
+              Please provide a valid location.
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="description" class="form-label">Description</label>
+            <input type="text" formControlName="description" id="description" [ngClass]="getFormClass(editHotelForm, 'description')" class="form-control"/>
+            <div class="invalid-feedback" *ngIf="!isValid(editHotelForm, 'description')">
+              Please provide a valid description.
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="hotelPhotos">Photos</label>
+            <input type="file" formControlName="hotelPhotos" id="hotelPhotos" class="form-control" [ngClass]="getFormClass(editHotelForm, 'hotelPhotos')" multiple />
+            <div class="invalid-feedback" *ngIf="!isValid(editHotelForm, 'hotelPhotos')">
+              Please provide valid photos.
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-primary" (click)="editHotel()">Edit Hotel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal fade" id="addRoomModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">New Room</h5>
+        <button type="button" class="btn-close" id="addRoomCloseModal" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="addRoomForm" (ngSubmit)="addRoom()">
+          <div class="form-group">
+            <label for="roomName" class="form-label">Room Name</label>
+            <input type="text" formControlName="roomName" id="roomName" [ngClass]="getFormClass(addRoomForm, 'roomName')" class="form-control"/>
+            <div class="invalid-feedback" *ngIf="!isValid(addRoomForm, 'roomName')">
+              Please provide a valid room name.
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="type">Room Type</label>
+            <select formControlName="type" id="type" [(ngModel)]='defaultType' class="form-control" [ngClass]="getFormClass(addRoomForm, 'type')">
+              <option value="single">Single</option>
+              <option value="double">Double</option>
+              <option value="suite">Suite</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="capacity">Capacity</label>
+            <input type="number" formControlName="capacity" id="capacity" class="form-control" [ngClass]="getFormClass(addRoomForm, 'capacity')"/>
+            <div class="invalid-feedback" *ngIf="!isValid(addRoomForm, 'capacity')">
+              Please provide a valid capacity.
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="price">Price</label>
+            <input type="number" formControlName="price" id="price" class="form-control" [ngClass]="getFormClass(addRoomForm, 'price')" />
+            <div class="invalid-feedback" *ngIf="!isValid(addRoomForm, 'price')">
+              Please provide a valid price.
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="availableFrom">Available From</label>
+            <input type="date" formControlName="availableFrom" id="availableFrom" class="form-control" [ngClass]="getFormClass(addRoomForm, 'availableFrom')" />
+            <div class="invalid-feedback" *ngIf="!isValid(addRoomForm, 'availableFrom')">
+              Please provide a valid date.
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="availableTo">Available To</label>
+            <input type="date" formControlName="availableTo" id="availableTo" class="form-control" [ngClass]="getFormClass(addRoomForm, 'availableTo')"/>
+            <div class="invalid-feedback" *ngIf="!isValid(addRoomForm, 'availableTo')">
+              Please provide a valid date.
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="amenities">Amenities</label>
+            <input type="text" formControlName="amenities" id="amenities" class="form-control" [ngClass]="getFormClass(addRoomForm, 'amenities')" />
+            <div class="invalid-feedback" *ngIf="!isValid(addRoomForm, 'amenities')">
+              Please provide valid amenities.
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="photos">Photos</label>
+            <input type="file" formControlName="photos" id="photos" class="form-control" [ngClass]="getFormClass(addRoomForm, 'photos')" multiple />
+            <div class="invalid-feedback" *ngIf="!isValid(addRoomForm, 'photos')">
+              Please provide valid photos.
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-primary" (click)="addRoom()">Add Room</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<div class="modal fade" id="editRoomModal" tabindex="-1" aria-hidden="true" (shown.bs.modal)="setEditRoomFormValues(selectedRoom)">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Edit Room</h5>
+        <button type="button" class="btn-close" id="editRoomCloseModal" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="editRoomForm" (ngSubmit)="editRoom()">
+          <div class="form-group">
+            <label for="roomName" class="form-label">Room Name</label>
+            <input type="text" formControlName="roomName" id="roomName" [ngClass]="getFormClass(editRoomForm, 'roomName')" class="form-control"/>
+            <div class="invalid-feedback" *ngIf="!isValid(editRoomForm, 'roomName')">
+              Please provide a valid room name.
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="type">Room Type</label>
+            <select formControlName="type" id="type" [(ngModel)]='defaultType' class="form-control" [ngClass]="getFormClass(editRoomForm, 'type')">
+              <option value="single">Single</option>
+              <option value="double">Double</option>
+              <option value="suite">Suite</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="capacity">Capacity</label>
+            <input type="number" formControlName="capacity" id="capacity" class="form-control" [ngClass]="getFormClass(editRoomForm, 'capacity')"/>
+            <div class="invalid-feedback" *ngIf="!isValid(editRoomForm, 'capacity')">
+              Please provide a valid capacity.
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="price">Price</label>
+            <input type="number" formControlName="price" id="price" class="form-control" [ngClass]="getFormClass(editRoomForm, 'price')" />
+            <div class="invalid-feedback" *ngIf="!isValid(editRoomForm, 'price')">
+              Please provide a valid price.
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="availableFrom">Available From</label>
+            <input type="date" formControlName="availableFrom" id="availableFrom" class="form-control" [ngClass]="getFormClass(editRoomForm, 'availableFrom')" />
+            <div class="invalid-feedback" *ngIf="!isValid(editRoomForm, 'availableFrom')">
+              Please provide a valid date.
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="availableTo">Available To</label>
+            <input type="date" formControlName="availableTo" id="availableTo" class="form-control" [ngClass]="getFormClass(editRoomForm, 'availableTo')"/>
+            <div class="invalid-feedback" *ngIf="!isValid(editRoomForm, 'availableTo')">
+              Please provide a valid date.
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="amenities">Amenities</label>
+            <input type="text" formControlName="amenities" id="amenities" class="form-control" [ngClass]="getFormClass(editRoomForm, 'amenities')" />
+            <div class="invalid-feedback" *ngIf="!isValid(editRoomForm, 'amenities')">
+              Please provide valid amenities.
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="editPhotos">Photos</label>
+            <input type="file" formControlName="editPhotos" id="editPhotos" class="form-control" [ngClass]="getFormClass(editRoomForm, 'editPhotos')" multiple />
+            <div class="invalid-feedback" *ngIf="!isValid(editRoomForm, 'editPhotos')">
+              Please provide valid photos.
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-primary" (click)="editRoom()">Edit Room</button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,45 @@
+<app-dynamic-lottie *ngIf="state.loading"></app-dynamic-lottie>
+
+<div class="auth-wrapper">
+  <div class="auth-inner">
+    <h1>Login</h1>
+    <hr>
+    <form [formGroup]="loginForm" (ngSubmit)="login()">
+      <label for="username">Username</label>
+      <input type="username" formControlName="username" />
+      
+      <label for="password">Password</label>
+      <input type="password" formControlName="password" />
+      
+      <app-form-error
+        [control]="loginForm.controls['username']"
+        [data]="{
+          errorText: 'Invalid username',
+          required: 'Username is required',
+        }"
+      ></app-form-error>
+
+      <app-form-error
+        [control]="loginForm.controls['password']"
+        [data]="{
+          errorText: 'Invalid password',
+          required: 'Password is required',
+          invalid: 'Invalid username or password'
+        }"
+      ></app-form-error>
+
+      <button type="submit">Submit</button>
+    </form>
+
+    <ng-container *ngIf="!state.loading && state.done">
+      <div *ngIf="state.error" class="error-box">
+        <div class="error">
+          <p>Error logging in</p>
+        </div>
+      </div>
+      <p *ngIf="!state.error">Logged in successfully, redirecting...</p>
+    </ng-container >
+
+    <p class="mt-2">Don't have an account? <a href="/register">Register here.</a></p>
+  </div>
+</div>

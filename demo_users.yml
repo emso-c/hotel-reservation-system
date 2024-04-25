@@ -1,0 +1,10 @@
+demo_users:
+  - type: Hotel Owner
+    name: ali_koc
+    password: Password1
+  - type: Customer
+    name: examplecustomer
+    password: Password2
+  - type: Customer
+    name: examplecustomer2
+    password: Password3

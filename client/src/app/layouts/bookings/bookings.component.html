@@ -1,0 +1,4 @@
+<div class="container p-5 d-flex flex-column align-items-center" style="min-height: 86.21vh">
+  <app-customer-bookings *ngIf="role == 'customer'"></app-customer-bookings>
+  <app-owner-bookings *ngIf="role == 'hotelOwner'"></app-owner-bookings>
+</div>

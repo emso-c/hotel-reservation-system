@@ -1,0 +1,211 @@
+<app-dynamic-lottie *ngIf="state.loading"></app-dynamic-lottie>
+
+<div *ngIf="!state.loading && !state.error" style="min-height: 86.21vh">
+  <div class="container mb-4" *ngIf="hotels.length != 0">
+    <h3>Filter Results</h3>
+    <div class="row mb-4">
+      <div class="col-md-4">
+        <form [formGroup]="filterForm" (ngSubmit)="filter()">
+          <div class="row">
+            <div class="col">
+              <label for="rating">Rating</label>
+              <input type="number" formControlName="rating" class="form-control" min="0" max="5" value="0">
+            </div>
+            <div class="col">
+              <label for="minPrice">Min Price</label>
+              <input type="number" formControlName="minPrice" class="form-control" min="0" value="0">
+            </div>
+            <div class="col">
+              <label for="maxPrice">Max Price</label>
+              <input type="number" formControlName="maxPrice" class="form-control" min="0">
+            </div>
+          </div>
+          <div class="d-grid">
+            <button type="submit" class="btn btn-secondary mt-3">Filter &nbsp;<fa-icon [icon]="faFilter"></fa-icon></button>
+          </div>
+        </form>
+      </div>
+
+      <div class="col-md-4">
+        <!-- <h3>Sort by:</h3> -->
+        <form [formGroup]="sortForm" (ngSubmit)="sort()">
+          <div class="row">
+            <div class="col">
+              <label for="sort">Sort by</label>
+              <select formControlName="sort" class="form-control">
+                <option value="rating" selected>Rating</option>
+                <option value="price">Price</option>
+              </select>
+            </div>
+            <div class="col">
+              <label for="order">Order</label>
+              <select formControlName="order" class="form-control">
+                <option value="asc" selected>Ascending</option>
+                <option value="desc">Descending</option>
+              </select>
+            </div>
+          </div>
+          <div class="d-grid">
+            <button type="submit" class="btn btn-secondary mt-3">Sort &nbsp;<fa-icon [icon]="faSort"></fa-icon></button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <button type="button" class="btn btn-primary me-2" (click)="reset()">Reset Filters &nbsp; <fa-icon [icon]="faTrash"></fa-icon></button>
+
+    <div class="container d-flex justify-content-start mt-4" *ngIf="hotels.length > 0">
+      <app-form-error
+        class="m-1"
+        [control]="filterForm.controls['rating']"
+        [data]="{
+          errorText: 'Invalid rating',
+          min: 'Rating must be at least 0',
+          max: 'Rating must be at most 5'
+        }"
+      ></app-form-error>
+      <app-form-error
+        class="m-1"
+        [control]="filterForm.controls['minPrice']"
+        [data]="{
+          errorText: 'Invalid min price',
+          min: 'Min price must be at least 0'
+        }"
+      ></app-form-error>
+      <app-form-error
+        class="m-1"
+        [control]="filterForm.controls['maxPrice']"
+        [data]="{
+          errorText: 'Invalid max price',
+          greaterThan: 'Max price must be greater than min price'
+        }"
+      ></app-form-error>
+      <app-form-error
+        class="m-1"
+        [control]="sortForm.controls['sort']"
+        [data]="{
+          errorText: 'Invalid sort',
+          required: 'Sort is required',
+          pattern: 'Sort value pattern is invalid',
+        }"
+      ></app-form-error>
+      <app-form-error
+        class="m-1"
+        [control]="sortForm.controls['order']"
+        [data]="{
+          errorText: 'Invalid order',
+          required: 'Order is required',
+          pattern: 'Order value should be either asc or desc',
+        }"
+      ></app-form-error>
+    </div>
+  </div>
+
+  <span *ngIf="profile.role === 'hotelOwner'">
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addHotelModal">
+      Add a new hotel &nbsp;
+      <fa-icon [icon]="faPlus"></fa-icon>
+    </button>
+  </span>
+
+  <p *ngIf="hotels.length == 0 && !this.state.initialSearch">No hotels found with the given criteria</p>
+
+
+  <hr>
+
+  
+  <div class="card mb-3" *ngFor="let hotel of hotels">
+    <div class="row g-0">
+      <div class="col-md-8">
+        <div [id]="'carousel-'+hotel._id" class="carousel slide">
+          <div class="carousel-inner">
+            <div *ngFor="let photo of hotel.photos; let i = index" class="carousel-item" [ngClass]="{'active': i == 0}">
+              <img
+                width="100%"
+                height="300"
+                src="http://localhost:5000/cdn/static/photos/hotel/{{hotel._id}}/{{photo}}"
+                class="d-block rounded-start"
+                alt="hotel photo">
+            </div>
+          </div>
+          <button class="carousel-control-prev" type="button" [attr.data-bs-target]="'#carousel-'+hotel._id" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+          </button>
+          <button class="carousel-control-next" type="button" [attr.data-bs-target]="'#carousel-'+hotel._id" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+          </button>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card-body d-flex flex-column">
+          <h5 class="m-1 fs-3 card-title">{{hotel.name}}</h5>
+          <p class="m-1 card-text" style='white-space: nowrap; overflow: hidden; text-overflow: ellipsis;'>{{hotel.location}}</p>
+          <p class="m-1 card-text">
+            <small class="text-muted">
+              <span *ngFor="let i of [].constructor(getWholeStars(hotel.rating))">&starf;</span>
+              <span *ngFor="let i of [].constructor(getEmptyStars(hotel.rating))">&star;</span>
+              {{hotel.rating}} ({{hotel.ratedBy.length}})
+            </small>
+          </p>
+          <p class="m-1 card-text" style='white-space: nowrap; overflow: hidden; text-overflow: ellipsis;'>{{hotel.description}}</p>
+          <p class="m-1 card-text">
+            <small class="text-muted">
+              Lowest price:
+              <span *ngIf="hotel.lowestPrice == 0">...</span>
+              <span *ngIf="hotel.lowestPrice != 0">{{hotel.lowestPrice}}</span>
+            </small>
+          </p>
+          <button (click)="view(hotel)" class="m-1 btn btn-primary">View Rooms</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="addHotelModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Add Hotel</h5>
+        <button type="button" class="btn-close" id="addHotelCloseModal" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="addHotelForm" (ngSubmit)="addHotel()">
+          <div class="form-group">
+            <label for="name" class="form-label">Name</label>
+            <input type="text" formControlName="name" id="name" [ngClass]="getFormClass(addHotelForm, 'name')" class="form-control"/>
+            <div class="invalid-feedback" *ngIf="!isValid(addHotelForm, 'name')">
+              Please provide a valid name.
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="location" class="form-label">Location</label>
+            <input type="text" formControlName="location" id="location" [ngClass]="getFormClass(addHotelForm, 'location')" class="form-control"/>
+            <div class="invalid-feedback" *ngIf="!isValid(addHotelForm, 'location')">
+              Please provide a valid location.
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="description" class="form-label">Description</label>
+            <input type="text" formControlName="description" id="description" [ngClass]="getFormClass(addHotelForm, 'description')" class="form-control"/>
+            <div class="invalid-feedback" *ngIf="!isValid(addHotelForm, 'description')">
+              Please provide a valid description.
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="photos">Photos</label>
+            <input type="file" formControlName="photos" id="photos" class="form-control" [ngClass]="getFormClass(addHotelForm, 'photos')" multiple />
+            <div class="invalid-feedback" *ngIf="!isValid(addHotelForm, 'photos')">
+              Please provide valid photos.
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-primary" (click)="addHotel()">Add Hotel</button>
+      </div>
+    </div>
+  </div>
+</div>

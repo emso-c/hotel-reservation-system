@@ -1,0 +1,124 @@
+
+<h1>Search Hotels</h1>
+
+<hr>
+
+<form [formGroup]="searchForm" (ngSubmit)="search()" class="mb-4">
+  <div class="row">
+    <div class="col-md-4">
+      <label for="location">Where do you want to go?</label>
+      <input type="text" formControlName="location" class="form-control" placeholder="Enter location">
+    </div>
+    <div class="col-md-2">
+      <label for="checkIn">From</label>
+      <input type="date" formControlName="checkIn" class="form-control">
+    </div>
+    <div class="col-md-2">
+      <label for="checkOut">To</label>
+      <input type="date" formControlName="checkOut" class="form-control">
+    </div>
+    <div class="col-md-2">
+      <label for="capacity">Capacity</label>
+      <input type="number" formControlName="capacity" class="form-control" min="1" max="5" value="5">
+    </div>
+    <div class="col-md-2">
+      <button type="submit" class="btn btn-primary m-1 mt-4"><fa-icon [icon]="faMagnifyingGlass"></fa-icon></button>
+      <button type="button" class="btn btn-primary m-1 mt-4" (click)="toggleAdvancedFilters()">
+        <fa-icon [icon]="faFilter"></fa-icon>
+      </button>
+    </div>
+  </div>
+  
+  <div class="advanced-filters mt-4" [ngClass]="{'d-none': !showAdvancedFilters}">
+    <div class="row">
+      <div class="col-md-4">
+        <label for="type">Room Type</label>
+        <select formControlName="type" class="form-control">
+          <option value="">-</option>
+          <option value="single">Single</option>
+          <option value="double">Double</option>
+          <option value="suite">Suite</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label for="minPrice">Min Price</label>
+        <input type="number" formControlName="minPrice" class="form-control" min="0" value="0">
+      </div>
+      <div class="col-md-2">
+        <label for="maxPrice">Max Price</label>
+        <input type="number" formControlName="maxPrice" class="form-control" min="0">
+      </div>
+    </div>
+  </div>
+
+  <div class="container d-flex justify-content-start mt-4">
+      <app-form-error
+        class="m-1"
+      [control]="searchForm.controls['location']"
+      [data]="{
+        errorText: 'Invalid location',
+        required: 'Location is required',
+        minLength: 'Location must be at least 3 characters long',
+        maxLength: 'Location must be at most 50 characters long',
+        pattern: 'Location must contain only letters and spaces'
+      }"
+      ></app-form-error>
+      <app-form-error
+        class="m-1"
+        [control]="searchForm.controls['checkIn']"
+        [data]="{
+          errorText: 'Invalid check-in date',
+          required: 'Check-in date is required'
+        }"
+      ></app-form-error>
+      <app-form-error
+        class="m-1"
+        [control]="searchForm.controls['checkOut']"
+        [data]="{
+          errorText: 'Invalid check-out date',
+          required: 'Check-out date is required',
+        }"
+      ></app-form-error>
+      <app-form-error
+        class="m-1"
+        [control]="searchForm.controls['type']"
+        [data]="{
+          errorText: 'Invalid room type',
+          pattern: 'Room type must be single, double or suite'
+        }"
+      ></app-form-error>
+      <app-form-error
+        class="m-1"
+        [control]="searchForm.controls['capacity']"
+        [data]="{
+          errorText: 'Invalid capacity',
+          required: 'Capacity is required',
+          min: 'Capacity must be at least 1',
+          max: 'Capacity must be at most 5'
+        }"
+      ></app-form-error>
+      <app-form-error
+        class="m-1"
+        [control]="searchForm.controls['minPrice']"
+        [data]="{
+          errorText: 'Invalid min price',
+          min: 'Min price must be at least 0'
+        }"
+      ></app-form-error>
+      <app-form-error
+        class="m-1"
+        [control]="searchForm.controls['maxPrice']"
+        [data]="{
+          errorText: 'Invalid max price',
+          min: 'Max price must be at least 0',
+          greaterThan: 'Max price must be greater than min price'
+        }"
+      ></app-form-error>
+  </div>
+
+</form>
+
+
+<app-dynamic-lottie *ngIf="state.loading" file="globe"></app-dynamic-lottie>
+
+<app-hotels [allHotels]="hotels" [state]="state"></app-hotels>

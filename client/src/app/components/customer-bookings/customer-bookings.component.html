@@ -1,0 +1,51 @@
+<app-dynamic-lottie *ngIf="state.loading"></app-dynamic-lottie>
+
+  <p class="text-danger" *ngIf="!state.loading && state.error">Error loading bookings</p>
+  <ng-container *ngIf="!state.loading && !state.error">
+    <ng-container *ngIf="bookings.length == 0">
+      <h1>No bookings found</h1>
+      <a href="/home" class="btn btn-primary">Search for facilities</a>
+    </ng-container>
+    <ng-container *ngIf="bookings.length > 0">
+      <h2>Bookings</h2>
+      <table class="table">
+        <thead class="thead-dark">
+          <tr>
+            <th>Hotel</th>
+            <th>Room</th>
+            <th>Check In</th>
+            <th>Check Out</th>
+            <th>Price</th>
+            <th>Status</th>
+            <th>Paid</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let booking of bookings">
+            <td>{{booking.hotel.name}}</td>
+            <td>{{booking.room.roomName}}</td>
+            <td>{{booking.checkInDate}}</td>
+            <td>{{booking.checkOutDate}}</td>
+            <td>{{booking.totalPrice}}</td>
+            <td>{{booking.status}}</td>
+            <td>{{booking.isPaid}}</td>
+            <td class="actions">
+              <ng-container *ngIf="booking.status == 'cancelled' || booking.status == 'rejected'">
+                <button (click)="deleteBooking(booking)" class="btn btn-danger">Delete</button>
+              </ng-container>
+              <ng-container *ngIf="!booking.isPaid">
+                <ng-container *ngIf="booking.status == 'pending' || booking.status == 'approved'">
+                  <button (click)="payBooking(booking)" class="btn btn-success text-white">Pay</button>
+                  <button (click)="cancelBooking(booking)" class="btn btn-warning text-white" style="margin-left: 5px;">Cancel</button>
+                </ng-container>
+              </ng-container>
+              <ng-container *ngIf="booking.status == 'approved' && booking.isPaid && !this.isRatedByUser(booking)">
+                <button (click)="rateHotel(booking)" class="btn btn-info">Rate</button>
+              </ng-container>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </ng-container>
+  </ng-container>

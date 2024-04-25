@@ -1,0 +1,12 @@
+<div *ngIf="control.invalid && control.touched" class="error-box">
+  <ul class="error">
+    <li>{{ data.errorText }}</li>
+    <ul>
+      <li *ngFor="let error of control.errors | keyvalue">
+        <ng-container *ngIf="data[error.key]">
+          <li>{{ data[error.key] }}</li>
+        </ng-container>
+      </li>
+    </ul>
+  </ul>
+</div>

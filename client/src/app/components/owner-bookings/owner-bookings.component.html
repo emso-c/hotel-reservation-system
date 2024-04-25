@@ -1,0 +1,46 @@
+<p *ngIf="state.loading">Loading...</p>
+<p *ngIf="!state.loading && state.error">Error loading bookings</p>
+<ng-container *ngIf="!state.loading && !state.error">
+  <ng-container *ngIf="bookings.length == 0">
+    <p>No bookings found for any of your hotels</p>
+  </ng-container>
+  <ng-container *ngIf="bookings.length > 0">
+    <h2>Bookings</h2>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Hotel</th>
+          <th>Room</th>
+          <th>Check In</th>
+          <th>Check Out</th>
+          <th>Price</th>
+          <th>Status</th>
+          <th>Paid</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+        *ngFor="let booking of bookings"
+        [class.table-danger]="booking.status == 'rejected' || booking.status == 'cancelled'"
+        [class.table-success]="booking.status == 'approved'"
+        [class.table-warning]="booking.status == 'pending'"
+        >
+          <td>{{booking.hotel.name}}</td>
+          <td>{{booking.room.roomName}}</td>
+          <td>{{booking.checkInDate | date: 'medium' }}</td>
+          <td>{{booking.checkOutDate | date: 'medium' }}</td>
+          <td>{{booking.totalPrice}}</td>
+          <td>{{booking.status}}</td>
+          <td>{{booking.isPaid}}</td>
+          <td class="actions">
+            <ng-container *ngIf="booking.status == 'pending'">
+              <button (click)="approveBooking(booking)" class="btn btn-success me-2">Approve</button>
+              <button (click)="rejectBooking(booking)" class="btn btn-danger">Reject</button>
+            </ng-container>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </ng-container>
+</ng-container>

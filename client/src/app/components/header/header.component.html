@@ -1,0 +1,17 @@
+<div class="header">
+  <div class="header-inner">
+    <div class="header-logo">
+      <a href="/">
+        <img src="../../../assets/logo.png" alt="logo"/>
+        <span>Istanbook</span>
+      </a>
+    </div>
+    <div *ngIf="isLoggedIn" class="header-nav">
+      <a href="/home">Home</a>
+      <a href="/bookings">Bookings</a>
+      <a href="/profile">Profile</a>
+      <a (click)="logout()">Logout</a>
+      <img [src]="profilePhoto" alt="user"/>
+    </div>
+  </div>
+</div>

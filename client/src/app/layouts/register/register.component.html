@@ -1,0 +1,81 @@
+<app-dynamic-lottie *ngIf="state.loading"></app-dynamic-lottie>
+
+<div class="auth-wrapper">
+  <div class="auth-inner">
+    <h1>Register</h1>
+    <hr>
+    <form [formGroup]="registerForm" (ngSubmit)="register()">
+      <label for="username">Username</label>
+      <input type="username" formControlName="username" />
+
+      <label for="email">Email</label>
+      <input type="email" formControlName="email" />
+
+      <label for="role">Role</label>
+      <select formControlName="role">
+        <option value="customer" [defaultSelected]=true>Customer</option>
+        <option value="hotelOwner">Hotel Owner</option>
+      </select>
+
+      <label for="password">Password</label>
+      <input type="password" formControlName="password" />
+
+      <label for="passwordConfirm">Confirm Password</label>
+      <input type="password" formControlName="passwordConfirm" />
+
+      <app-form-error
+        [control]="registerForm.controls['username']"
+        [data]="{
+          errorText: 'Invalid username',
+          required: 'Username is required',
+          minlength: 'Username must be at least 4 characters',
+          maxlength: 'Username must be at most 20 characters',
+          pattern: 'Username must contain only letters and numbers'
+        }"
+      ></app-form-error>
+
+      <app-form-error
+        [control]="registerForm.controls['password']"
+        [data]="{
+          errorText: 'Invalid password',
+          required: 'Password is required',
+          minlength: 'Password must be at least 8 characters',
+          maxlength: 'Password must be at most 20 characters',
+          pattern: 'Password must contain at least one lowercase letter, one uppercase letter, and one digit'
+        }"
+      ></app-form-error>
+
+      <app-form-error
+        [control]="registerForm.controls['email']"
+        [data]="{
+          errorText: 'Invalid email',
+          required: 'Email is required',
+          email: 'Email must be a valid email address'
+        }"
+      ></app-form-error>
+
+      <app-form-error
+        [control]="registerForm.controls['role']"
+        [data]="{
+          errorText: 'Invalid role',
+          required: 'Role is required',
+          pattern: 'Role must be either customer or hotel owner'
+        }"
+      ></app-form-error>
+
+      <app-form-error
+        [control]="registerForm.controls['passwordConfirm']"
+        [data]="{
+          errorText: 'Invalid password confirmation',
+          required: 'Password confirmation is required',
+          passwordMatch: 'Passwords must match'
+        }"
+      ></app-form-error>
+
+      <button type="submit">Submit</button>
+
+      <p class="mt-3">Already have an account? <a href="/login">Login here.</a></p>
+    </form>
+  </div>
+</div>
+

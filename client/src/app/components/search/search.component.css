@@ -1,0 +1,61 @@
+.wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 86.21vh;
+    background: linear-gradient(rgba(255,255,255,.6), rgba(255,255,255,.6)), url('../../../assets/background.jpg') no-repeat center center fixed;
+    background-size:cover;
+    background-color: #f5f5f5;
+  }
+  
+  .wrapper-inner{
+      width: 100%;
+      max-width: 400px;
+      height: auto;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+  
+.wrapper-inner h3 {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .wrapper-inner form {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .wrapper-inner label {
+    margin-bottom: 5px;
+  }
+  
+  .wrapper-inner input {
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  .wrapper-inner button {
+    padding: 10px;
+    margin-top: 10px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  .wrapper-inner select {
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  .wrapper-inner button:hover {
+    background-color: #0056b3;
+  }
